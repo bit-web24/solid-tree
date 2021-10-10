@@ -2,7 +2,7 @@ import requests
 import json
 
 username = 'bit-web24'
-token    = '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'
+token    = ''
 url      = "https://api.github.com/users/{}".format(username)
 
 userdata = requests.get(url).json()
