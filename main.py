@@ -1,44 +1,39 @@
 import requests
+import json
 
 username = 'bit-web24'
 token    = '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'
 url      = "https://api.github.com/users/{}".format(username)
 
 userdata = requests.get(url).json()
+DATA = {
+    "username"  : userdata['login'],
+    "email"     : userdata['email'],
+    "followers" : str(userdata['followers']),
+    "following" : str(userdata['following']),
+    "joined_at" : userdata['created_at'],
+    "location"  : userdata['location'],
+    "repos"     : []
+}
 
-print('userdata:')
-print(' Username: ' + userdata['login'])
-print(' Email: ' + str(userdata['email']))
-print(' Followers: ' + str(userdata['followers']))
-print(' Following: ' + str(userdata['following']))
-print(' Joined-on: ' + userdata['created_at'])
-print(' Location: ' + str(userdata['location']))
-
-userdata = requests.get(url+ '/repos').json()
+userdata   = requests.get(url+ '/repos').json()
 repo_count = len(userdata)
 
-print('Repositories: ')
 for n in range(0, repo_count):
-    license = "Not Found"
+    license = "NULL"
+    keys = ['name', 'created_at', 'language', 'visibility', 'default_branch', 'forks']
+    repo_data = {}
+
     try:
         license = userdata[n]["license"]["name"]
     except:
         pass
 
-    repo_data = """
-        {}: {}
-            created_at: {}
-            language  : {}
-            Visibility: {}
-            Licence   : {}
-            Default-branch: {}
-            Forks     : {}
-    """.format(str(n+1),
-     userdata[n]['name'],
-     userdata[n]['created_at'],
-     userdata[n]['language'],
-     userdata[n]['visibility'],
-     license,
-     userdata[n]['default_branch'],
-     userdata[n]['forks'])
-    print(repo_data)
+    for s in keys:
+        repo_data[s] = userdata[n][s]
+
+    repo_data['license'] = license
+    DATA['repos'].append(repo_data)
+
+with open('github.json', 'w') as json_file:
+    json.dump(DATA, json_file, indent = 4)
